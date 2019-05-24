@@ -56,6 +56,10 @@ configure_file(flac.pc.in flac.pc @ONLY)
 
 include_directories("include")
 
+if(WIN32)
+    add_library(windows_unicode_filenames STATIC windows_unicode_filenames.c)
+endif()
+
 add_library(FLAC
     bitmath.c
     bitreader.c
@@ -87,8 +91,7 @@ add_library(FLAC
     $<$<BOOL:${OGG_FOUND}>:ogg_decoder_aspect.c>
     $<$<BOOL:${OGG_FOUND}>:ogg_encoder_aspect.c>
     $<$<BOOL:${OGG_FOUND}>:ogg_helper.c>
-    $<$<BOOL:${OGG_FOUND}>:ogg_mapping.c>
-    $<$<BOOL:${WIN32}>:windows_unicode_filenames.c>)
+    $<$<BOOL:${OGG_FOUND}>:ogg_mapping.c>)
 if(TARGET FLAC-asm)
     target_sources(FLAC PRIVATE $<TARGET_OBJECTS:FLAC-asm>)
 endif()
@@ -103,6 +106,9 @@ target_include_directories(FLAC INTERFACE
 target_link_libraries(FLAC PRIVATE $<$<BOOL:${HAVE_LROUND}>:m>)
 if(TARGET Ogg::ogg)
     target_link_libraries(FLAC PUBLIC Ogg::ogg)
+endif()
+if(TARGET windows_unicode_filenames)
+    target_link_libraries(FLAC PUBLIC windows_unicode_filenames)
 endif()
 if(BUILD_SHARED_LIBS)
     set_target_properties(FLAC PROPERTIES
